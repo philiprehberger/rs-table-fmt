@@ -1,0 +1,13 @@
+[package]
+name = "philiprehberger-table-fmt"
+version = "0.1.0"
+edition = "2021"
+authors = ["Philip Rehberger"]
+description = "Terminal table rendering with alignment, borders, Unicode support, and ANSI color awareness"
+license = "MIT"
+repository = "https://github.com/philiprehberger/rs-table-fmt"
+keywords = ["table", "terminal", "cli", "formatting", "display"]
+categories = ["command-line-interface", "value-formatting"]
+
+[dependencies]
+unicode-width = "0.2"
