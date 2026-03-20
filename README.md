@@ -1,6 +1,10 @@
 # rs-table-fmt
 
-Terminal table rendering with alignment, borders, Unicode support, and ANSI color awareness.
+[![CI](https://github.com/philiprehberger/rs-table-fmt/actions/workflows/ci.yml/badge.svg)](https://github.com/philiprehberger/rs-table-fmt/actions/workflows/ci.yml)
+[![Crates.io](https://img.shields.io/crates/v/philiprehberger-table-fmt.svg)](https://crates.io/crates/philiprehberger-table-fmt)
+[![License](https://img.shields.io/github/license/philiprehberger/rs-table-fmt)](LICENSE)
+
+Terminal table rendering with alignment, borders, Unicode support, and ANSI color awareness
 
 ## Installation
 
@@ -26,34 +30,6 @@ let table = Table::new()
 println!("{}", table);
 ```
 
-Output:
-```
-┌─────────┬─────┬──────────┐
-│ Name    │ Age │ City     │
-├─────────┼─────┼──────────┤
-│ Alice   │  30 │ New York │
-│ Bob     │  25 │ London   │
-│ Charlie │  35 │ Tokyo    │
-└─────────┴─────┴──────────┘
-```
-
-### Border styles
-
-- `BorderStyle::Ascii` — classic `+---+` borders
-- `BorderStyle::Unicode` — box-drawing characters
-- `BorderStyle::Rounded` — rounded corners
-- `BorderStyle::Minimal` — header underline only
-- `BorderStyle::None` — no borders
-
-### Markdown output
-
-```rust
-let md = Table::new()
-    .header(["Name", "Score"])
-    .row(["Alice", "95"])
-    .to_markdown();
-```
-
 ## API
 
 | Function / Type | Description |
@@ -68,6 +44,13 @@ let md = Table::new()
 | `.print()` | Render and print to stdout |
 | `.to_markdown()` | Render as Markdown table |
 | `.to_csv()` | Render as CSV |
+
+## Development
+
+```bash
+cargo test
+cargo clippy -- -D warnings
+```
 
 ## License
 
