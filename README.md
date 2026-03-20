@@ -10,7 +10,7 @@ Terminal table rendering with alignment, borders, Unicode support, and ANSI colo
 
 ```toml
 [dependencies]
-philiprehberger-table-fmt = "0.1"
+philiprehberger-table-fmt = "0.1.0"
 ```
 
 ## Usage
