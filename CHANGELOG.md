@@ -1,5 +1,11 @@
 # Changelog
 
+## [0.2.0] - 2026-04-05
+
+- Add `to_json()` method for rendering table data as a JSON array of objects
+- Headers are used as object keys; falls back to `col0`, `col1`, etc. when no headers are set
+- Built without external JSON dependencies (manual serialization)
+
 ## 0.1.2 (2026-03-31)
 
 - Standardize README to 3-badge format with emoji Support section

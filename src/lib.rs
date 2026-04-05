@@ -141,7 +141,8 @@ impl BorderStyle {
 ///
 /// Use the fluent builder API to construct a table, then render it with
 /// [`to_string()`](Table::to_string), [`print()`](Table::print),
-/// [`to_markdown()`](Table::to_markdown), or [`to_csv()`](Table::to_csv).
+/// [`to_markdown()`](Table::to_markdown), [`to_csv()`](Table::to_csv),
+/// or [`to_json()`](Table::to_json).
 pub struct Table {
     headers: Option<Vec<String>>,
     rows: Vec<Vec<String>>,
@@ -278,6 +279,52 @@ impl Table {
             out.push_str(" |\n");
         }
 
+        out
+    }
+
+    /// Render the table as a JSON array of objects.
+    ///
+    /// Each row becomes an object with header values as keys. If no headers are set,
+    /// keys default to `"col0"`, `"col1"`, etc. Values are always strings.
+    pub fn to_json(&self) -> String {
+        let col_count = self.column_count();
+        if col_count == 0 {
+            return "[]".to_string();
+        }
+
+        let keys: Vec<String> = if let Some(ref headers) = self.headers {
+            (0..col_count)
+                .map(|i| {
+                    headers
+                        .get(i)
+                        .cloned()
+                        .unwrap_or_else(|| format!("col{}", i))
+                })
+                .collect()
+        } else {
+            (0..col_count).map(|i| format!("col{}", i)).collect()
+        };
+
+        let mut out = String::from("[");
+        for (row_idx, row) in self.rows.iter().enumerate() {
+            if row_idx > 0 {
+                out.push(',');
+            }
+            out.push('{');
+            for (i, key) in keys.iter().enumerate() {
+                if i > 0 {
+                    out.push(',');
+                }
+                let value = row.get(i).map(|s| s.as_str()).unwrap_or("");
+                out.push('"');
+                json_escape_into(&mut out, key);
+                out.push_str("\":\"");
+                json_escape_into(&mut out, value);
+                out.push('"');
+            }
+            out.push('}');
+        }
+        out.push(']');
         out
     }
 
@@ -628,6 +675,23 @@ pub fn pad_to_width(s: &str, width: usize, alignment: Alignment) -> String {
             let left = padding / 2;
             let right = padding - left;
             format!("{}{}{}", " ".repeat(left), s, " ".repeat(right))
+        }
+    }
+}
+
+/// Append a JSON-escaped version of `s` into `out`.
+fn json_escape_into(out: &mut String, s: &str) {
+    for c in s.chars() {
+        match c {
+            '"' => out.push_str("\\\""),
+            '\\' => out.push_str("\\\\"),
+            '\n' => out.push_str("\\n"),
+            '\r' => out.push_str("\\r"),
+            '\t' => out.push_str("\\t"),
+            c if (c as u32) < 0x20 => {
+                out.push_str(&format!("\\u{:04x}", c as u32));
+            }
+            _ => out.push(c),
         }
     }
 }
@@ -1000,5 +1064,70 @@ mod tests {
     fn test_default_trait() {
         let table = Table::default();
         assert_eq!(table.to_string(), "");
+    }
+
+    #[test]
+    fn test_to_json_basic() {
+        let json = Table::new()
+            .header(["Name", "Age"])
+            .row(["Alice", "30"])
+            .row(["Bob", "25"])
+            .to_json();
+
+        assert_eq!(
+            json,
+            r#"[{"Name":"Alice","Age":"30"},{"Name":"Bob","Age":"25"}]"#
+        );
+    }
+
+    #[test]
+    fn test_to_json_no_headers() {
+        let json = Table::new()
+            .row(["A", "B"])
+            .row(["C", "D"])
+            .to_json();
+
+        assert_eq!(
+            json,
+            r#"[{"col0":"A","col1":"B"},{"col0":"C","col1":"D"}]"#
+        );
+    }
+
+    #[test]
+    fn test_to_json_empty_table() {
+        let json = Table::new().to_json();
+        assert_eq!(json, "[]");
+    }
+
+    #[test]
+    fn test_to_json_special_chars() {
+        let json = Table::new()
+            .header(["Key"])
+            .row(["has \"quotes\" and \\backslash"])
+            .to_json();
+
+        assert_eq!(
+            json,
+            r#"[{"Key":"has \"quotes\" and \\backslash"}]"#
+        );
+    }
+
+    #[test]
+    fn test_to_json_missing_cells() {
+        let json = Table::new()
+            .header(["A", "B", "C"])
+            .row(["1"])
+            .to_json();
+
+        assert_eq!(json, r#"[{"A":"1","B":"","C":""}]"#);
+    }
+
+    #[test]
+    fn test_to_json_no_rows() {
+        let json = Table::new()
+            .header(["Name", "Age"])
+            .to_json();
+
+        assert_eq!(json, "[]");
     }
 }

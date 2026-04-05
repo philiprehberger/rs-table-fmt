@@ -10,7 +10,7 @@ Terminal table rendering with alignment, borders, Unicode support, and ANSI colo
 
 ```toml
 [dependencies]
-philiprehberger-table-fmt = "0.1.1"
+philiprehberger-table-fmt = "0.2.0"
 ```
 
 ## Usage
@@ -44,6 +44,7 @@ println!("{}", table);
 | `.print()` | Render and print to stdout |
 | `.to_markdown()` | Render as Markdown table |
 | `.to_csv()` | Render as CSV |
+| `.to_json()` | Render as JSON array of objects |
 
 ## Development
 
